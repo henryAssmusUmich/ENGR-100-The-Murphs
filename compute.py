@@ -36,16 +36,19 @@ def encode_nums(n1, n2):
 def compute(sock):
     while True:
         # TODO: Take in two numbers via the command terminal
-
+        n1 = input("Enter first number: ")
+        n2 = input("Enter second number: ")
         # TODO: convert input numbers into a properly terminated string.
         # e.g. n1 = 2 and n2 = 5 becomes "2,5\n"
         # HINT: Are there any functions defined in this script we can use?
-
+        data = encode_nums(n1, n2)
         # Send the data string over to the ESP32 over previously created socket
         sock.sendall(data)
 
         # TODO: Receive the summed results from the ESP32.
         # HINT: Look at functions defined above. What function would be useful for receiving data?
+        result = recv_line(sock)
+        print(f"Result from ESP32: {result}\n")
         time.sleep(0.1)
 
 if __name__ == "__main__":
