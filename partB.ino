@@ -59,13 +59,20 @@ void loop() {
   if (client && client.connected() && client.available()) {
     /* TODO: Read in the raw input. */
     /* Example input string: 5,4\n */
-
-    // Serial.println("Received input: " + raw_input);
+    String raw_input = client.readStringUntil('\n');
+    raw_input.trim();
+    
+    //Serial.println("Received input: " + raw_input);
 
     /* TODO: Parse the raw input into 2 different numbers. */
-    int commaIndex = /* TODO: How do we find the comma delimiter in this string? */;
+    int commaIndex = raw_input.indexOf(',');
+    /* TODO: How do we find the comma delimiter in this string? */;
     if (commaIndex > 0) {
       /* TODO: Convert the substrings into two separate integers. */
+      int num1 = raw_input.substring(0, commaIndex).toInt();
+      int num2 = raw_input.substring(commaIndex + 1).toInt();
+      int res = num1 + num2;
+      
       Serial.println("Res: " + res);
 
       client.println(res);  // Send back result
