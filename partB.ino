@@ -6,7 +6,7 @@
 const char *ssid_STA = "ENGR100-400"; //Enter the router name
 const char *password_STA = "notapwd777"; //Enter the router password
 
-IPAddress local_IP(192, 168, 50, /* TODO */);//Set the IP address of ESP32 itself
+IPAddress local_IP(192, 168, 50, 218);//Set the IP address of ESP32 itself
 IPAddress gateway(192, 168, 50, 1);   //Set the gateway of the router
 IPAddress subnet(255,255,255,0);  //Set the subnet mask for ESP32 itself
 
