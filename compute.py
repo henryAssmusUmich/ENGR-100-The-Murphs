@@ -4,7 +4,7 @@
 import socket
 import time
 
-TCP_IP = "192.168.50.XXX" # Set the last three digits to your ESP32's assigned 3 digit code
+TCP_IP = "192.168.50.217" # Set the last three digits to your ESP32's assigned 3 digit code
 TCP_PORT = 5005 # Keep this on port 5005.
 TIMEOUT_S = 5 # Timeout is 5 seconds
 
