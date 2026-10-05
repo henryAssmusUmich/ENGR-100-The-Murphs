@@ -33,13 +33,12 @@ def main():
     print("Manual control ready. Use WASD to move, x to stop, q to quit.")
     while True:
         # TODO: Read one character from the terminal
-        ch = # REPLACE WITH FUNCTION CALL
-
+        ch = getch()
         # TODO: Check if the terminal character matches WASDX
-        if ch # FILL IN THE REST OF THE CONDITIONAL :
-            #sock.sendall((ch + "\n").encode("utf-8"))
-            #print(f"Sent: {ch}")
-
+        if ch in {'w','a','s','d','x'}: # FILL IN THE REST OF THE CONDITIONAL :
+            sock.sendall((ch + "\n").encode("utf-8"))
+            print(f"Sent: {ch}")
+            
         elif ch == "q":
             print("Quitting...")
             break
