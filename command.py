@@ -3,7 +3,7 @@ import sys
 import termios
 import tty
 
-TCP_IP = "192.168.50.XXX"   # Replace with your ESP32 IP
+TCP_IP = "192.168.50.218"   # Replace with your ESP32 IP
 TCP_PORT = 5005
 TIMEOUT_S = 5
 
