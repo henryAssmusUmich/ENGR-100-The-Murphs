@@ -19,34 +19,34 @@ void Set_Speed(unsigned char Left,unsigned char Right)
 
 void forward () {
   //go forward
- digitalWrite(7, HIGH);       //set Pin #7 to HIGH and set Pin #8 to LOW, making two left-side wheels rotate forward.
- digitalWrite(8, LOW);
- digitalWrite(9, LOW);        //set Pin #11 to HIGH and set Pin #9 to LOW, making two right-side wheels rotate forward.
- digitalWrite(11, HIGH);
+ digitalWrite(7, LOW);       //set Pin #7 to HIGH and set Pin #8 to LOW, making two left-side wheels rotate forward.
+ digitalWrite(8, HIGH);
+ digitalWrite(9, HIGH);        //set Pin #11 to HIGH and set Pin #9 to LOW, making two right-side wheels rotate forward.
+ digitalWrite(11, LOW);
 }
 
 void back () {
    //go backward
- digitalWrite(7, LOW);        //set Pin #7 to LOW and set Pin #8 to HIGH, making two left-side wheels rotate backward.
- digitalWrite(8, HIGH);
- digitalWrite(9, HIGH);       //set Pin #11 to LOW and set Pin #9 to HIGH, making two right-side wheels rotate backward.
- digitalWrite(11, LOW);
+ digitalWrite(7, HIGH);        //set Pin #7 to LOW and set Pin #8 to HIGH, making two left-side wheels rotate backward.
+ digitalWrite(8, LOW);
+ digitalWrite(9, LOW);       //set Pin #11 to LOW and set Pin #9 to HIGH, making two right-side wheels rotate backward.
+ digitalWrite(11, HIGH);
 }
 
 void left () {
   //turn left
- digitalWrite(7, LOW);        //set Pin #7 to LOW and set Pin #8 to HIGH, making two left-side wheels rotate backward.
- digitalWrite(8, HIGH);
- digitalWrite(9, LOW);        //set Pin #11 to HIGH and set Pin #9 to LOW, making two right-side wheels rotate forward.
- digitalWrite(11, HIGH);
+ digitalWrite(7, HIGH);        //set Pin #7 to LOW and set Pin #8 to HIGH, making two left-side wheels rotate backward.
+ digitalWrite(8, LOW);
+ digitalWrite(9, HIGH);        //set Pin #11 to HIGH and set Pin #9 to LOW, making two right-side wheels rotate forward.
+ digitalWrite(11, LOW);
 }
 
 void right () {
   //turn right
- digitalWrite(7, HIGH);       //set Pin #7 to HIGH and set Pin #8 to LOW, making two left-side wheels rotate forward.
- digitalWrite(8, LOW);
- digitalWrite(9, HIGH);       //set Pin #11 to LOW and set Pin #9 to HIGH, making two right-side wheels rotate backward.
- digitalWrite(11, LOW);
+ digitalWrite(7, LOW);       //set Pin #7 to HIGH and set Pin #8 to LOW, making two left-side wheels rotate forward.
+ digitalWrite(8, HIGH);
+ digitalWrite(9, LOW);       //set Pin #11 to LOW and set Pin #9 to HIGH, making two right-side wheels rotate backward.
+ digitalWrite(11, HIGH);
 }
 
 void stopcar () {
