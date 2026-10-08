@@ -11,7 +11,7 @@ import termios
 import tty
 import sys
 
-TCP_IP = '192.168.50.101'
+TCP_IP = '192.168.50.218'
 TCP_PORT = 5005
 
 url='http://192.168.50.101/stream'
