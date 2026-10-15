@@ -14,7 +14,7 @@ import sys
 TCP_IP = '192.168.50.218'
 TCP_PORT = 5005
 
-url='http://192.168.50.101/stream'
+url='http://192.168.50.218/stream'
 im=None
 
 def socket_setup():
