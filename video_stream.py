@@ -34,9 +34,9 @@ def video_stream(url):
     while True:
         #Grab the current frame stored at the ESP32-CAM
         ret, frame=vid.read()
-        if not ret:
-            print("Couldn't read frame. Killing thread.")
-            break
+        if not ret or frame is None:
+            print("Couldn't read frame or frame is empty. Skipping...")
+            break 
 
         # resize frame
         frame = imutils.resize(frame, width=600)
