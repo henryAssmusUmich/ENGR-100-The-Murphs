@@ -107,13 +107,13 @@ float pid_control(float error, float dt) {
   static float lastError = 0;
 
   // TODO: compute error integral (error accumulation scaled by time)
-  integral += /* TODO */;
+  integral += error * dt;
 
   // TODO: compute error derivative (derivative approximation)
-  float derivative = /* TODO */;
-
+  float derivative = (error - lastError) / dt;
+  
   // TODO: compute output (sum of scaled P, I, D error values)
-  float output = /* TODO */;
+  float output = K_P * error + K_I * integral + derivative * K_D;
 
   // keep last value, return computed output
   lastError = error;
