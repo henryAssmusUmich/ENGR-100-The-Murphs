@@ -6,11 +6,11 @@
 #include "camera_pins.h"
 #define port 5005
 
-const char *ssid_STA = "ENGR100-400"; //Enter the router name
-const char *password_STA = "notapwd777"; //Enter the router password
+const char *ssid_STA = "ENGR100-400"; // Enter the router name
+const char *password_STA = "notapwd777"; // Enter the router password
 
-IPAddress local_IP(192, 168, 50, /* TODO */); //Set the IP address of ESP32 itself
-IPAddress gateway(192, 168, 50, 1); //gateway for this device is the AP/Object Detection ESP32's IP Address
+IPAddress local_IP(192, 168, 50, /* TODO */); // Set the IP address of ESP32 itself
+IPAddress gateway(192, 168, 50, 1); // Gateway for this device is the AP/Object Detection ESP32's IP Address
 IPAddress subnet(255, 255, 255, 0);
 
 WiFiServer server(port);
@@ -18,14 +18,15 @@ WiFiServer server(port);
 void startCameraServer();
 
 // define PID control constants
-#define K_P 0.5
+#define K_P 0.50
 #define K_I 0.00
-#define K_D 0.002
-#define BASE_SPEED 75
+#define K_D 0.00
+#define BASE_SPEED 100
+#define TOP_SPEED 255
 #define INFLECTION_POINT 30.0
 
 void cameraServerSetup() {
-  camera_config_t config;
+  camera_config_t config = {};
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -46,57 +47,56 @@ void cameraServerSetup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  
-  // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
-  //                      for larger pre-allocated frame buffer.
-  if(psramFound()){
-    config.frame_size = FRAMESIZE_UXGA;
-    config.jpeg_quality = 10;
-    config.fb_count = 2;
-  } else {
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
-    config.fb_count = 1;
+
+  // Use QVGA resolution for higher frame rate and lower memory usage
+  config.frame_size = FRAMESIZE_QVGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 1;
+  config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+
+  // Use PSRAM if available
+  if (psramFound()) {
+    config.fb_location = CAMERA_FB_IN_PSRAM;
+  }
+  else {
+    config.fb_location = CAMERA_FB_IN_DRAM;
   }
 
-  // camera init
+  // Camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
-    Serial.printf("Camera init failed with error 0x%x", err);
+    Serial.printf("Camera init failed with error 0x%x\n", err);
     return;
   }
+  Serial.println("Camera initialized successfully.");
 
+  // Drop down frame size for higher initial frame rate
   sensor_t * s = esp_camera_sensor_get();
-  // drop down frame size for higher initial frame rate
   s->set_framesize(s, FRAMESIZE_QVGA);
-  s->set_vflip(s, 0);        //1-Upside down, 0-No operation
-  s->set_hmirror(s, 0);      //1-Reverse left and right, 0-No operation
-
-  startCameraServer();
+  s->set_vflip(s, 0);        // 1-Upside down, 0-No operation
+  s->set_hmirror(s, 0);      // 1-Reverse left and right, 0-No operation
 }
 
 void WiFiSetup() {
   Serial.println("Connecting as station with static IP...");
-
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   Serial.println(WiFi.config(local_IP, gateway, subnet) ? "Ready" : "Failed!");
+  WiFi.begin(ssid_STA, password_STA);
 
-  boolean result = WiFi.begin(ssid_STA, password_STA);
-  if(result){
-    Serial.println("Ready");
-    Serial.println(String("Station IP address = ") + WiFi.localIP().toString());
-    Serial.println(String("MAC address = ") + WiFi.macAddress().c_str());
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
-
-  else{
-    Serial.println("Failed!");
-  }
-
   Serial.println("");
   Serial.println("WiFi connected.");
-  Serial.print(WiFi.localIP().toString());
-  Serial.println("' to connect");
+
+  Serial.print("Station IP address = ");
+  Serial.println(WiFi.localIP());
+
+  Serial.print("MAC address = ");
+  Serial.println(WiFi.macAddress());
 
   server.begin(port);
   WiFi.setAutoReconnect(true);
@@ -135,18 +135,27 @@ char determine_direction(float cte) {
 }
 
 void setup() {
-  // put your setup code here, to run once:
+  // Put your setup code here, to run once:
   Serial.begin(115200);
-  WiFiSetup();
+
+  // Initialize camera BEFORE WiFi
   cameraServerSetup();
+
+  // Connect to WiFi after camera memory has been allocated
+  WiFiSetup();
+
+  // Start camera stream after WiFi is connected
+  Serial.println("Starting camera server...");
+  startCameraServer();
+  Serial.println("Camera server started.");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  WiFiClient client = server.available();            // listen for incoming clients
-  if (client) {                                     // if you get a client,
-    while (client.connected()) {                    // loop while the client's connected
-      if (client.available()) {                     // if there's bytes to read from the client, get input
+  // Put your main code here, to run repeatedly:
+  WiFiClient client = server.available();           // Listen for incoming clients
+  if (client) {                                     // If you get a client,
+    while (client.connected()) {                    // Loop while the client's connected
+      if (client.available()) {                     // If there's bytes to read from the client, get input
         String raw_input = client.readStringUntil('\n'); // read in until newline character
         raw_input.trim();
 
@@ -160,11 +169,11 @@ void loop() {
         float dt = 0.2; // set to 0.2 for stability
 
         float left_factor = 1.0; // if robot leans right, increase left factor
-        float right_factor = 1.1; // if robot leans left, increase right factor
+        float right_factor = 1.0; // if robot leans left, increase right factor
 
-        float speed_correction = pid_control(cte, 0.2); // perform PID control on received cte BEST VALUE: 0.25
-        float left_side_speed = constrain(BASE_SPEED - speed_correction * left_factor, 0, 150);
-        float right_side_speed = constrain(BASE_SPEED + speed_correction * right_factor, 0, 150);
+        float speed_correction = pid_control(cte, dt); // perform PID control on received cte BEST VALUE: 0.25
+        float left_side_speed = constrain(BASE_SPEED - speed_correction * left_factor, 0, TOP_SPEED);
+        float right_side_speed = constrain(BASE_SPEED + speed_correction * right_factor, 0, TOP_SPEED);
 
         char direction = determine_direction(cte); // determine how to shift the car's movement based on CTE
 
@@ -173,7 +182,8 @@ void loop() {
         client.println(pid_cmd); // send PID values back to laptop for debugging
       }
     }
-    client.stop();                                  // stop the client connecting.
+    Serial.println("STOP");
+    client.stop();                                  // Stop the client connecting.
     Serial.println("Client Disconnected.");
   }
 }
