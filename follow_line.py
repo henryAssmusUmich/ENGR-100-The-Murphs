@@ -41,7 +41,7 @@ def follow_line(sock):
     while True:
         # Capture current frame from ESP32
         ret, frame = vid.read()
-        if not ret:
+        if not ret or frame is None:
             print("Couldn't read frame. Killing program.")
             sock.sendall(b"STOP\n")
             break
