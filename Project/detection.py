@@ -62,21 +62,25 @@ upper = []
 
 while True:
     choice = input("Input colors [r]ed, [o]range, [g]reen, [b]lue, [e] to exit").strip().lower()
+    if choice == "r" && "r" not in colors:
     if choice == "r" and "r" not in colors:
         print("Red added")
         colors.append("red")
         lower.append(np.array([0, 100, 100], dtype=np.uint8))
         upper.append(np.array([10, 255, 255], dtype=np.uint8))
+    elif choice == "o" && "o" not in colors:
     elif choice == "o" and "o" not in colors:
         print("Orange added")
         colors.append("orange")
         lower.append(np.array([11, 100, 100], dtype=np.uint8))
         upper.append(np.array([25, 255, 255], dtype=np.uint8))
+    elif choice == "g" && "g" not in colors:
     elif choice == "g" and "g" not in colors:
         print("Green added")
         colors.append("green")
         lower.append(np.array([36, 100, 100], dtype=np.uint8))
         upper.append(np.array([85, 255, 255], dtype=np.uint8))
+    elif choice == "b" && "b" not in colors:
     elif choice == "b" and "b" not in colors:
         print("Blue added")
         colors.append("blue")
@@ -101,10 +105,7 @@ print(f"w: {w}")
 if ret:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     blurred = cv2.GaussianBlur(hsv, (5, 5), 0)
-    mask = np.zeros(hsv.shape[:2], dtype=np.uint8)
-    for i in range(len(lower)):
-      new_mask = cv2.inRange(hsv, lower[i], upper[i])
-      mask = cv2.bitwise_or(mask, new_mask)
+    mask = cv2.inRange(blurred, lower_orange, upper_orange)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
@@ -137,57 +138,55 @@ while True:
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     blurred = cv2.GaussianBlur(hsv, (3, 3), 0)
-    for i in range(len(lower)):
-      new_mask = cv2.inRange(hsv, lower[i], upper[i])
-      mask = cv2.bitwise_or(mask, new_mask)
-    mask = cv2.inRange(blurred, lower[i], upper[i])
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+    for i in range(len(colors)):
+      mask = cv2.inRange(blurred, lower[i], upper[i])
+      mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+      mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+      contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    if contours:
-        c = max(contours, key=cv2.contourArea)  # Track the largest contour
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
+      if contours:
+          c = max(contours, key=cv2.contourArea)  # Track the largest contour
+          ((x, y), radius) = cv2.minEnclosingCircle(c)
 
-        if radius > 1:  # Ensure detection validity
-            z_distance = calculate_distance(focal_length, KNOWN_DIAMETER, radius * 2)
-            x_real, y_real = calculate_xy(x, y, z_distance)
+          if radius > 1:  # Ensure detection validity
+              z_distance = calculate_distance(focal_length, KNOWN_DIAMETER, radius * 2)
+              x_real, y_real = calculate_xy(x, y, z_distance)
 
-            # Apply Exponential Moving Average smoothing
-            x_smoothed = ALPHA * x_real + (1 - ALPHA) * x_smoothed
-            y_smoothed = ALPHA * y_real + (1 - ALPHA) * y_smoothed
-            z_smoothed = ALPHA * z_distance + (1 - ALPHA) * z_smoothed
+              # Apply Exponential Moving Average smoothing
+              x_smoothed = ALPHA * x_real + (1 - ALPHA) * x_smoothed
+              y_smoothed = ALPHA * y_real + (1 - ALPHA) * y_smoothed
+              z_smoothed = ALPHA * z_distance + (1 - ALPHA) * z_smoothed
 
-            # Prepare measurement for Kalman Filter
-            measurement = np.array([[x_smoothed], [y_smoothed], [z_smoothed]], dtype=np.float32)
-            estimated_state = kalman.correct(measurement)
-            predicted = kalman.predict()
+              # Prepare measurement for Kalman Filter
+              measurement = np.array([[x_smoothed], [y_smoothed], [z_smoothed]], dtype=np.float32)
+              estimated_state = kalman.correct(measurement)
+              predicted = kalman.predict()
 
-            # Extract smoothed values
-            x_kalman, y_kalman, z_kalman = predicted[:3].flatten()
-            vx_kalman, vy_kalman, vz_kalman = estimated_state[3, 0], estimated_state[4, 0], estimated_state[5, 0]
+              # Extract smoothed values
+              x_kalman, y_kalman, z_kalman = predicted[:3].flatten()
+              vx_kalman, vy_kalman, vz_kalman = estimated_state[3, 0], estimated_state[4, 0], estimated_state[5, 0]
 
-            # Display results
-            #TODO im commenting this out for now
-            # cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
-            #cv2.putText(frame, f"X: {x_kalman:.2f} cm", (int(x - radius), int(y - radius - 30)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            #cv2.putText(frame, f"Y: {y_kalman:.2f} cm", (int(x - radius), int(y - radius - 15)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            #cv2.putText(frame, f"Z: {z_kalman:.2f} cm", (int(x - radius), int(y - radius)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            #cv2.putText(frame, f"VX: {vx_kalman:.2f} cm", (int(x - radius), int(y - radius + 15)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            #cv2.putText(frame, f"VY: {vy_kalman:.2f} cm", (int(x - radius), int(y - radius + 30)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            #cv2.putText(frame, f"VZ: {vz_kalman:.2f} cm", (int(x - radius), int(y - radius + 45)), 
-            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              # Display results
+              #TODO im commenting this out for now
+              # cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
+              #cv2.putText(frame, f"X: {x_kalman:.2f} cm", (int(x - radius), int(y - radius - 30)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              #cv2.putText(frame, f"Y: {y_kalman:.2f} cm", (int(x - radius), int(y - radius - 15)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              #cv2.putText(frame, f"Z: {z_kalman:.2f} cm", (int(x - radius), int(y - radius)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              #cv2.putText(frame, f"VX: {vx_kalman:.2f} cm", (int(x - radius), int(y - radius + 15)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              #cv2.putText(frame, f"VY: {vy_kalman:.2f} cm", (int(x - radius), int(y - radius + 30)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+              #cv2.putText(frame, f"VZ: {vz_kalman:.2f} cm", (int(x - radius), int(y - radius + 45)), 
+              #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-    cv2.imshow("3D Position Estimation with Smoothing", frame)
+      cv2.imshow("3D Position Estimation with Smoothing", frame)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+          break
 
 cap.release()
 cv2.destroyAllWindows()
