@@ -62,22 +62,22 @@ upper = []
 
 while True:
     choice = input("Input colors [r]ed, [o]range, [g]reen, [b]lue, [e] to exit").strip().lower()
-    if choice == "r" && "r" not in colors:
+    if choice == "r" and "r" not in colors:
         print("Red added")
         colors.append("red")
         lower.append(np.array([0, 100, 100], dtype=np.uint8))
         upper.append(np.array([10, 255, 255], dtype=np.uint8))
-    elif choice == "o" && "o" not in colors:
+    elif choice == "o" and "o" not in colors:
         print("Orange added")
         colors.append("orange")
         lower.append(np.array([11, 100, 100], dtype=np.uint8))
         upper.append(np.array([25, 255, 255], dtype=np.uint8))
-    elif choice == "g" && "g" not in colors:
+    elif choice == "g" and "g" not in colors:
         print("Green added")
         colors.append("green")
         lower.append(np.array([36, 100, 100], dtype=np.uint8))
         upper.append(np.array([85, 255, 255], dtype=np.uint8))
-    elif choice == "b" && "b" not in colors:
+    elif choice == "b" and "b" not in colors:
         print("Blue added")
         colors.append("blue")
         lower.append(np.array([100, 100, 100], dtype=np.uint8))
