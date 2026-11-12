@@ -53,28 +53,39 @@ def calculate_xy(pixel_x, pixel_y, z_distance):
 
     return x_real, y_real
 
-# HSV range for detecting an orange ball
+# HSV range for detecting different colors
+#TODO add HSV values for different colors
+
+colors = []
+lower = []
+upper = []
+
 while True:
-    choice = input("Select threshold: [n]arrow, [m]edium, [w]ide: ").strip().lower()
-    if choice == "n":
-        mode = "narrow"
-        lower_orange = np.array([5, 35, 100], dtype=np.uint8)
-        upper_orange = np.array([25, 255, 255], dtype=np.uint8)
-        break
-    elif choice == "m":
-        mode = "medium"
-        lower_orange = np.array([0, 15, 80], dtype=np.uint8)
-        upper_orange = np.array([35, 255, 255], dtype=np.uint8)
-        break
-    elif choice == "w":
-        mode = "wide"
-        lower_orange = np.array([0, 5, 50], dtype=np.uint8)
-        upper_orange = np.array([45, 255, 255], dtype=np.uint8)
+    choice = input("Input colors [r]ed, [o]range, [g]reen, [b]lue, [e] to exit").strip().lower()
+    if choice == "r" && "r" not in colors:
+        print("Red added")
+        colors.append("red")
+        lower.append(np.array([0, 100, 100], dtype=np.uint8))
+        upper.append(np.array([10, 255, 255], dtype=np.uint8))
+    elif choice == "o" && "o" not in colors:
+        print("Orange added")
+        colors.append("orange")
+        lower.append(np.array([11, 100, 100], dtype=np.uint8))
+        upper.append(np.array([25, 255, 255], dtype=np.uint8))
+    elif choice == "g" && "g" not in colors:
+        print("Green added")
+        colors.append("green")
+        lower.append(np.array([36, 100, 100], dtype=np.uint8))
+        upper.append(np.array([85, 255, 255], dtype=np.uint8))
+    elif choice == "b" && "b" not in colors:
+        print("Blue added")
+        colors.append("blue")
+        lower.append(np.array([100, 100, 100], dtype=np.uint8))
+        upper.append(np.array([130, 255, 255], dtype=np.uint8))
+    elif choice == "e":
         break
     else:
-        print(f"Invalid choice {choice!r}; expected 'n', 'm', or 'w'.")
-
-print(f"Using {mode} threshold")
+        print(f"Invalid choice {choice!r}; expected 'r', 'o', 'g', 'b' or 'e'.")
 
 # Kernel for morphological operations
 kernel = np.ones((5, 5), np.uint8)
@@ -152,19 +163,20 @@ while True:
             vx_kalman, vy_kalman, vz_kalman = estimated_state[3, 0], estimated_state[4, 0], estimated_state[5, 0]
 
             # Display results
-            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
-            cv2.putText(frame, f"X: {x_kalman:.2f} cm", (int(x - radius), int(y - radius - 30)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            cv2.putText(frame, f"Y: {y_kalman:.2f} cm", (int(x - radius), int(y - radius - 15)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            cv2.putText(frame, f"Z: {z_kalman:.2f} cm", (int(x - radius), int(y - radius)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            cv2.putText(frame, f"VX: {vx_kalman:.2f} cm", (int(x - radius), int(y - radius + 15)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            cv2.putText(frame, f"VY: {vy_kalman:.2f} cm", (int(x - radius), int(y - radius + 30)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-            cv2.putText(frame, f"VZ: {vz_kalman:.2f} cm", (int(x - radius), int(y - radius + 45)), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #TODO im commenting this out for now
+            # cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
+            #cv2.putText(frame, f"X: {x_kalman:.2f} cm", (int(x - radius), int(y - radius - 30)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #cv2.putText(frame, f"Y: {y_kalman:.2f} cm", (int(x - radius), int(y - radius - 15)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #cv2.putText(frame, f"Z: {z_kalman:.2f} cm", (int(x - radius), int(y - radius)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #cv2.putText(frame, f"VX: {vx_kalman:.2f} cm", (int(x - radius), int(y - radius + 15)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #cv2.putText(frame, f"VY: {vy_kalman:.2f} cm", (int(x - radius), int(y - radius + 30)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+            #cv2.putText(frame, f"VZ: {vz_kalman:.2f} cm", (int(x - radius), int(y - radius + 45)), 
+            #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
     cv2.imshow("3D Position Estimation with Smoothing", frame)
 
