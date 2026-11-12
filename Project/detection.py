@@ -165,7 +165,7 @@ while True:
 
               # Display results
               #TODO im commenting this out for now
-               cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
+              cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 0), 2)
               cv2.putText(frame, f"X: {x_kalman:.2f} cm", (int(x - radius), int(y - radius - 30)), 
                           cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
               cv2.putText(frame, f"Y: {y_kalman:.2f} cm", (int(x - radius), int(y - radius - 15)), 
