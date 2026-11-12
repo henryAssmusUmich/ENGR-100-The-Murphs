@@ -101,6 +101,7 @@ print(f"w: {w}")
 if ret:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     blurred = cv2.GaussianBlur(hsv, (5, 5), 0)
+    mask = np.zeros(hsv.shape[:2], dtype=np.uint8)
     for i in range(len(lower)):
       new_mask = cv2.inRange(hsv, lower[i], upper[i])
       mask = cv2.bitwise_or(mask, new_mask)
